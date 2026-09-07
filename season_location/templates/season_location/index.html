@@ -1,14 +1,87 @@
-   {% extends 'base.html' %}
-   {% block content %}
-   <p class="page-title">Season &amp; Location</p>
-   <p class="page-sub">Random Forest predicts the best crop for this field</p>
-   <div class="card">
-       <div class="card-head">
-           <p class="h">Predicted crop</p>
-           <span class="badge">Random Forest</span>
-       </div>
-       <p style="font-size:20px;font-weight:bold;margin:0 0 6px;">Wheat</p>
-       <p style="font-size:13px;color:#6b6b66;margin:0;">87% confidence</p>
-   </div>
-   <p class="note">Sample data shown — model isn't connected yet.</p>
-   {% endblock %}
+{% extends 'base.html' %}
+{% block content %}
+<p class="page-title">Season &amp; Location</p>
+<p class="page-sub">Random Forest predicts the best crop for this field</p>
+
+<button class="upload-btn" onclick="document.getElementById('drawer-overlay').classList.add('open'); document.getElementById('upload-drawer').classList.add('open');">
+    Upload crop data
+</button>
+
+<div id="drawer-overlay" class="drawer-overlay" onclick="document.getElementById('drawer-overlay').classList.remove('open'); document.getElementById('upload-drawer').classList.remove('open');"></div>
+
+<div id="upload-drawer" class="drawer">
+    <h3>Upload crop data</h3>
+    <p class="sub">CSV with soil, rainfall &amp; temperature records</p>
+    <form onsubmit="event.preventDefault(); alert('Upload handling comes in a later step!');">
+        <input type="file" accept=".csv">
+        <div class="drawer-actions">
+            <button type="submit" class="submit">Upload</button>
+            <button type="button" class="close" onclick="document.getElementById('drawer-overlay').classList.remove('open'); document.getElementById('upload-drawer').classList.remove('open');">Cancel</button>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-head">
+        <p class="h">Predicted crop</p>
+        <span class="badge">Random Forest</span>
+    </div>
+    <p style="font-size:20px;font-weight:bold;margin:0 0 6px;">Wheat</p>
+    <p style="font-size:13px;color:#6b6b66;margin:0;">87% confidence</p>
+</div>
+
+<div class="card">
+    <div class="card-head">
+        <p class="h">7-day field trend</p>
+        <select id="season-metric-select" class="chart-select" onchange="updateSeasonChart()">
+            <option value="soil_moisture">Soil moisture</option>
+            <option value="rainfall">Rainfall</option>
+            <option value="temperature">Temperature</option>
+        </select>
+    </div>
+    <canvas id="seasonChart" height="90"></canvas>
+</div>
+
+<script>
+    const seasonData = {
+        soil_moisture: { label: 'Soil moisture (%)', values: [45, 44, 43, 42, 41, 42, 42], color: '#854f0b' },
+        rainfall: { label: 'Rainfall (mm)', values: [10, 4, 0, 22, 15, 6, 0], color: '#185fa5' },
+        temperature: { label: 'Temperature (°C)', values: [23, 24, 25, 24, 22, 23, 24], color: '#085041' },
+    };
+    const seasonDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    const seasonCtx = document.getElementById('seasonChart').getContext('2d');
+    let seasonChart = new Chart(seasonCtx, {
+        type: 'line',
+        data: {
+            labels: seasonDays,
+            datasets: [{
+                label: seasonData.soil_moisture.label,
+                data: seasonData.soil_moisture.values,
+                borderColor: seasonData.soil_moisture.color,
+                backgroundColor: seasonData.soil_moisture.color + '22',
+                fill: true,
+                tension: 0.35,
+                pointRadius: 3,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: false } }
+        }
+    });
+
+    function updateSeasonChart() {
+        const key = document.getElementById('season-metric-select').value;
+        const selected = seasonData[key];
+        seasonChart.data.datasets[0].label = selected.label;
+        seasonChart.data.datasets[0].data = selected.values;
+        seasonChart.data.datasets[0].borderColor = selected.color;
+        seasonChart.data.datasets[0].backgroundColor = selected.color + '22';
+        seasonChart.update();
+    }
+</script>
+
+<p class="note">Sample data shown — model isn't connected yet.</p>
+{% endblock %}
