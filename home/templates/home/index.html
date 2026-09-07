@@ -1,24 +1,100 @@
-   {% extends 'base.html' %}
-   {% block content %}
-   <p class="page-title">Farm overview</p>
-   <p class="page-sub">Thanjavur field · Rabi season</p>
-   <div class="banner">
-       <div class="dot"></div>
-       <span>Fungal risk elevated in field B — inspect within 24 hours</span>
-   </div>
-   <div class="grid">
-       <div class="metric"><p class="label">Temperature</p><p class="value">29&deg;C</p></div>
-       <div class="metric"><p class="label">Humidity</p><p class="value">68%</p></div>
-       <div class="metric"><p class="label">Soil moisture</p><p class="value">42%</p></div>
-       <div class="metric"><p class="label">Next irrigation</p><p class="value">6:00 AM</p></div>
-   </div>
-   <div class="card">
-       <p class="card-head h">Current crop</p>
-       <table class="kv">
-           <tr><td class="k">Crop</td><td class="v">Wheat</td></tr>
-           <tr><td class="k">Season</td><td class="v">Rabi</td></tr>
-           <tr><td class="k">Days to harvest</td><td class="v">45</td></tr>
-       </table>
-   </div>
-   <p class="note">Sample data shown — live sensor feed comes later.</p>
-   {% endblock %}
+{% extends 'base.html' %}
+{% block content %}
+<p class="page-title">Farm overview</p>
+<p class="page-sub">Thanjavur field · Rabi season</p>
+
+<button class="upload-btn" onclick="document.getElementById('drawer-overlay').classList.add('open'); document.getElementById('upload-drawer').classList.add('open');">
+    Upload weather log
+</button>
+
+<div id="drawer-overlay" class="drawer-overlay" onclick="document.getElementById('drawer-overlay').classList.remove('open'); document.getElementById('upload-drawer').classList.remove('open');"></div>
+
+<div id="upload-drawer" class="drawer">
+    <h3>Upload weather log</h3>
+    <p class="sub">CSV with daily temperature, humidity &amp; soil moisture readings</p>
+    <form onsubmit="event.preventDefault(); alert('Upload handling comes in a later step!');">
+        <input type="file" accept=".csv">
+        <div class="drawer-actions">
+            <button type="submit" class="submit">Upload</button>
+            <button type="button" class="close" onclick="document.getElementById('drawer-overlay').classList.remove('open'); document.getElementById('upload-drawer').classList.remove('open');">Cancel</button>
+        </div>
+    </form>
+</div>
+
+<div class="banner">
+    <div class="dot"></div>
+    <span>Fungal risk elevated in field B — inspect within 24 hours</span>
+</div>
+
+<div class="grid">
+    <div class="metric"><p class="label">Temperature</p><p class="value">29&deg;C</p></div>
+    <div class="metric"><p class="label">Humidity</p><p class="value">68%</p></div>
+    <div class="metric"><p class="label">Soil moisture</p><p class="value">42%</p></div>
+    <div class="metric"><p class="label">Next irrigation</p><p class="value">6:00 AM</p></div>
+</div>
+
+<div class="card">
+    <div class="card-head">
+        <p class="h">7-day trend</p>
+        <select id="metric-select" class="chart-select" onchange="updateChart()">
+            <option value="temperature">Temperature</option>
+            <option value="humidity">Humidity</option>
+            <option value="soil_moisture">Soil moisture</option>
+        </select>
+    </div>
+    <canvas id="trendChart" height="90"></canvas>
+</div>
+
+<script>
+    const trendData = {
+        temperature: { label: 'Temperature (°C)', values: [27, 28, 26, 29, 31, 30, 29], color: '#185fa5' },
+        humidity: { label: 'Humidity (%)', values: [62, 65, 70, 68, 64, 66, 68], color: '#085041' },
+        soil_moisture: { label: 'Soil moisture (%)', values: [48, 46, 44, 45, 43, 42, 42], color: '#854f0b' },
+    };
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    let trendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: days,
+            datasets: [{
+                label: trendData.temperature.label,
+                data: trendData.temperature.values,
+                borderColor: trendData.temperature.color,
+                backgroundColor: trendData.temperature.color + '22',
+                fill: true,
+                tension: 0.35,
+                pointRadius: 3,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: false } }
+        }
+    });
+
+    function updateChart() {
+        const key = document.getElementById('metric-select').value;
+        const selected = trendData[key];
+        trendChart.data.datasets[0].label = selected.label;
+        trendChart.data.datasets[0].data = selected.values;
+        trendChart.data.datasets[0].borderColor = selected.color;
+        trendChart.data.datasets[0].backgroundColor = selected.color + '22';
+        trendChart.update();
+    }
+</script>
+
+<p class="note">Sample 7-day data shown — live sensor history comes later.</p>
+
+<div class="card">
+    <p class="card-head h">Current crop</p>
+    <table class="kv">
+        <tr><td class="k">Crop</td><td class="v">Wheat</td></tr>
+        <tr><td class="k">Season</td><td class="v">Rabi</td></tr>
+        <tr><td class="k">Days to harvest</td><td class="v">45</td></tr>
+    </table>
+</div>
+<p class="note">Sample data shown — live sensor feed comes later.</p>
+{% endblock %}
