@@ -1,0 +1,17 @@
+   {% extends 'base.html' %}
+   {% block content %}
+   <p class="page-title">Grains &amp; Plants</p>
+   <p class="page-sub">KNN recommends seed variety, density &amp; yield</p>
+   <div class="card">
+       <div class="card-head">
+           <p class="h">Recommendation</p>
+           <span class="badge">K-Nearest Neighbors</span>
+       </div>
+       <table class="kv">
+           <tr><td class="k">Seed variety</td><td class="v">HD-2967</td></tr>
+           <tr><td class="k">Planting density</td><td class="v">100 kg/ha</td></tr>
+           <tr><td class="k">Yield estimate</td><td class="v">4.2 t/ha</td></tr>
+       </table>
+   </div>
+   <p class="note">Sample data shown — model isn't connected yet.</p>
+   {% endblock %}

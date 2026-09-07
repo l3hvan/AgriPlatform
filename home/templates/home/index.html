@@ -1,0 +1,24 @@
+   {% extends 'base.html' %}
+   {% block content %}
+   <p class="page-title">Farm overview</p>
+   <p class="page-sub">Thanjavur field · Rabi season</p>
+   <div class="banner">
+       <div class="dot"></div>
+       <span>Fungal risk elevated in field B — inspect within 24 hours</span>
+   </div>
+   <div class="grid">
+       <div class="metric"><p class="label">Temperature</p><p class="value">29&deg;C</p></div>
+       <div class="metric"><p class="label">Humidity</p><p class="value">68%</p></div>
+       <div class="metric"><p class="label">Soil moisture</p><p class="value">42%</p></div>
+       <div class="metric"><p class="label">Next irrigation</p><p class="value">6:00 AM</p></div>
+   </div>
+   <div class="card">
+       <p class="card-head h">Current crop</p>
+       <table class="kv">
+           <tr><td class="k">Crop</td><td class="v">Wheat</td></tr>
+           <tr><td class="k">Season</td><td class="v">Rabi</td></tr>
+           <tr><td class="k">Days to harvest</td><td class="v">45</td></tr>
+       </table>
+   </div>
+   <p class="note">Sample data shown — live sensor feed comes later.</p>
+   {% endblock %}
