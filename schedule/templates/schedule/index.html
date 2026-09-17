@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <p class="page-title">Schedule</p>
-<p class="page-sub">Fuzzy Logic turns sensor data into an irrigation plan</p>
+<p class="page-sub">Fuzzy Logic turns real soil moisture &amp; live sensor inputs into an irrigation plan</p>
 
 <button class="upload-btn" onclick="document.getElementById('drawer-overlay').classList.add('open'); document.getElementById('upload-drawer').classList.add('open');">
     Upload sensor data
@@ -23,67 +23,42 @@
 
 <div class="card">
     <div class="card-head">
-        <p class="h">Recommended action</p>
-        <span class="badge">Fuzzy Logic</span>
+        <p class="h">Field conditions</p>
     </div>
-    <table class="kv">
-        <tr><td class="k">Irrigate for</td><td class="v">18 minutes</td></tr>
-        <tr><td class="k">Fertilizer</td><td class="v">Apply nitrogen now</td></tr>
-    </table>
+    <form method="get">
+        <label style="font-size:12px;color:#6b6b66;display:block;margin-bottom:4px;">District (soil moisture auto-fills from real satellite data)</label>
+        <select name="district" class="chart-select" style="width:100%;margin-bottom:14px;">
+            {% for d in districts %}
+            <option value="{{ d }}" {% if d == selected_district %}selected{% endif %}>{{ d }}</option>
+            {% endfor %}
+        </select>
+
+        <label style="font-size:12px;color:#6b6b66;display:block;margin-bottom:4px;">Temperature: {{ temperature }}&deg;C (simulated live sensor)</label>
+        <input type="range" name="temperature" min="15" max="45" step="1" value="{{ temperature }}" style="width:100%;margin-bottom:14px;">
+
+        <label style="font-size:12px;color:#6b6b66;display:block;margin-bottom:4px;">Nutrient level: {{ nutrient_level }} (simulated live sensor)</label>
+        <input type="range" name="nutrient_level" min="0" max="100" step="1" value="{{ nutrient_level }}" style="width:100%;margin-bottom:14px;">
+
+        <button type="submit" class="upload-btn" style="margin-bottom:0;">Recalculate</button>
+    </form>
+</div>
+
+<div class="grid">
+    <div class="metric"><p class="label">Soil moisture (real)</p><p class="value">{{ soil_moisture }}</p></div>
+    <div class="metric"><p class="label">Temperature</p><p class="value">{{ temperature }}&deg;C</p></div>
+    <div class="metric"><p class="label">Nutrient level</p><p class="value">{{ nutrient_level }}</p></div>
 </div>
 
 <div class="card">
     <div class="card-head">
-        <p class="h">Today's sensor readings</p>
-        <select id="schedule-metric-select" class="chart-select" onchange="updateScheduleChart()">
-            <option value="soil_moisture">Soil moisture</option>
-            <option value="soil_temp">Soil temperature</option>
-            <option value="nitrogen">Nitrogen level</option>
-        </select>
+        <p class="h">Recommended action</p>
+        <span class="badge">Fuzzy Logic</span>
     </div>
-    <canvas id="scheduleChart" height="90"></canvas>
+    <table class="kv">
+        <tr><td class="k">Irrigate for</td><td class="v">{{ irrigation_minutes }} minutes</td></tr>
+        <tr><td class="k">Fertilizer</td><td class="v">{{ fertilizer_action }}</td></tr>
+    </table>
 </div>
 
-<script>
-    const scheduleHours = ['6am', '9am', '12pm', '3pm', '6pm', '9pm'];
-    const scheduleData = {
-        soil_moisture: { label: 'Soil moisture (%)', values: [30, 27, 24, 22, 25, 28], color: '#854f0b' },
-        soil_temp: { label: 'Soil temp (°C)', values: [26, 30, 34, 34, 31, 27], color: '#185fa5' },
-        nitrogen: { label: 'Nitrogen (ppm)', values: [12, 11, 10, 9, 9, 10], color: '#085041' },
-    };
-
-    const scheduleCtx = document.getElementById('scheduleChart').getContext('2d');
-    let scheduleChart = new Chart(scheduleCtx, {
-        type: 'line',
-        data: {
-            labels: scheduleHours,
-            datasets: [{
-                label: scheduleData.soil_moisture.label,
-                data: scheduleData.soil_moisture.values,
-                borderColor: scheduleData.soil_moisture.color,
-                backgroundColor: scheduleData.soil_moisture.color + '22',
-                fill: true,
-                tension: 0.35,
-                pointRadius: 3,
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: false } }
-        }
-    });
-
-    function updateScheduleChart() {
-        const key = document.getElementById('schedule-metric-select').value;
-        const selected = scheduleData[key];
-        scheduleChart.data.datasets[0].label = selected.label;
-        scheduleChart.data.datasets[0].data = selected.values;
-        scheduleChart.data.datasets[0].borderColor = selected.color;
-        scheduleChart.data.datasets[0].backgroundColor = selected.color + '22';
-        scheduleChart.update();
-    }
-</script>
-
-<p class="note">Sample data shown — sensors aren't connected yet.</p>
+<p class="note">Soil moisture is a real GLDAS satellite reading (most recent available, Dec 2023) for the selected district. Temperature &amp; nutrient level simulate live IoT sensor input until real hardware is connected.</p>
 {% endblock %}

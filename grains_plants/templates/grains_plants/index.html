@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <p class="page-title">Grains &amp; Plants</p>
-<p class="page-sub">KNN recommends seed variety, density &amp; yield</p>
+<p class="page-sub">KNN estimates yield from real historical seasons with similar conditions</p>
 
 <button class="upload-btn" onclick="document.getElementById('drawer-overlay').classList.add('open'); document.getElementById('upload-drawer').classList.add('open');">
     Upload seed data
@@ -23,62 +23,42 @@
 
 <div class="card">
     <div class="card-head">
-        <p class="h">Recommendation</p>
+        <p class="h">Select district</p>
+    </div>
+    <form method="get" style="display:flex; gap:10px; align-items:center;">
+        <select name="district" class="chart-select" style="flex:1;">
+            {% for d in districts %}
+            <option value="{{ d }}" {% if d == selected_district %}selected{% endif %}>{{ d }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="upload-btn" style="margin-bottom:0;">Estimate</button>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-head">
+        <p class="h">{{ predicted_crop }} &mdash; estimated yield</p>
         <span class="badge">K-Nearest Neighbors</span>
     </div>
-    <table class="kv">
-        <tr><td class="k">Seed variety</td><td class="v">HD-2967</td></tr>
-        <tr><td class="k">Planting density</td><td class="v">100 kg/ha</td></tr>
-        <tr><td class="k">Yield estimate</td><td class="v">4.2 t/ha</td></tr>
-    </table>
+    <p style="font-size:20px;font-weight:bold;margin:0 0 6px;">{{ estimated_yield }} t/ha</p>
+    <p style="font-size:13px;color:#6b6b66;margin:0;">Averaged from the 3 most similar historical seasons for {{ selected_district }}</p>
 </div>
 
 <div class="card">
     <div class="card-head">
         <p class="h">Similar past seasons</p>
-        <select id="grains-metric-select" class="chart-select" onchange="updateGrainsChart()">
-            <option value="yield">Yield (t/ha)</option>
-            <option value="match">Match %</option>
-        </select>
+        <span class="badge">Real data</span>
     </div>
-    <canvas id="grainsChart" height="90"></canvas>
+    <table class="kv">
+        {% for season in similar_seasons %}
+        <tr>
+            <td class="k">{{ season.district }} &middot; {{ season.year }}</td>
+            <td>{{ season.yield_t_ha }} t/ha</td>
+            <td class="v">{{ season.match_pct }}% match</td>
+        </tr>
+        {% endfor %}
+    </table>
 </div>
 
-<script>
-    const grainsLabels = ['2020', '2021', '2023'];
-    const grainsData = {
-        yield: { label: 'Yield (t/ha)', values: [4.3, 3.9, 4.1], color: '#185fa5' },
-        match: { label: 'Match %', values: [85, 89, 94], color: '#085041' },
-    };
-
-    const grainsCtx = document.getElementById('grainsChart').getContext('2d');
-    let grainsChart = new Chart(grainsCtx, {
-        type: 'bar',
-        data: {
-            labels: grainsLabels,
-            datasets: [{
-                label: grainsData.yield.label,
-                data: grainsData.yield.values,
-                backgroundColor: grainsData.yield.color,
-                borderRadius: 4,
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true } }
-        }
-    });
-
-    function updateGrainsChart() {
-        const key = document.getElementById('grains-metric-select').value;
-        const selected = grainsData[key];
-        grainsChart.data.datasets[0].label = selected.label;
-        grainsChart.data.datasets[0].data = selected.values;
-        grainsChart.data.datasets[0].backgroundColor = selected.color;
-        grainsChart.update();
-    }
-</script>
-
-<p class="note">Sample data shown — model isn't connected yet.</p>
+<p class="note">Estimate uses real ICRISAT yield records matched by NDVI &amp; groundwater similarity (2003&ndash;2013). Seed variety &amp; planting density aren't in the available data, so they've been dropped rather than faked.</p>
 {% endblock %}
