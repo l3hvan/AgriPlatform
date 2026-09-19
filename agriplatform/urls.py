@@ -23,4 +23,5 @@ urlpatterns = [
     path('season-location/', include('season_location.urls')),
     path('grains-plants/', include('grains_plants.urls')),
     path('schedule/', include('schedule.urls')),
+    path('accounts/', include('accounts.urls')),
 ]

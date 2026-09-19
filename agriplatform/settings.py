@@ -31,18 +31,18 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'home',
-    'season_location',
-    'grains_plants',
-    'schedule',
-   ]
-
+       'django.contrib.admin',
+       'django.contrib.auth',
+       'django.contrib.contenttypes',
+       'django.contrib.sessions',
+       'django.contrib.messages',
+       'django.contrib.staticfiles',
+       'home',
+       'season_location',
+       'grains_plants',
+       'schedule',
+       'accounts',
+]  
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -128,4 +128,10 @@ MAILERS = {
     'default': {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
+}
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {'console': {'class': 'logging.StreamHandler'}},
+    'root': {'handlers': ['console'], 'level': 'INFO'},
 }

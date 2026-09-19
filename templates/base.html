@@ -1,64 +1,83 @@
-   {% load static %}
-   <!DOCTYPE html>
-   <html lang="en">
-   <head>
-       <meta charset="UTF-8">
-       <title>AgriPlatform</title>
-       <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-       <style>
-    * { box-sizing: border-box; }
-    body { font-family: 'Inter', Arial, Helvetica, sans-serif; color: #1a1a1a; margin: 0; background: #fafaf8; }
-    .container { max-width: 820px; margin: 0 auto; padding: 28px 20px 60px; }
-    .nav { display: flex; gap: 4px; margin-bottom: 28px; border-bottom: 1px solid #e5e2d8; padding-bottom: 14px; }
-    .nav a { padding: 7px 15px; border-radius: 7px; font-size: 13px; font-weight: 500; color: #6b6b66; text-decoration: none; transition: background 0.15s ease; }
-    .nav a.active { background: #185fa5; color: #fff; }
-    .nav a:hover:not(.active) { background: #efece2; }
-    .page-title { font-size: 20px; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.01em; }
-    .page-sub { font-size: 13px; color: #6b6b66; margin: 0 0 22px; }
-    .note { font-size: 12px; color: #a39a55; margin-top: 8px; }
-    .grid { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 22px; }
-    .metric { background: #fff; border: 1px solid #ece9df; border-radius: 10px; padding: 16px 18px; flex: 1 1 150px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); transition: box-shadow 0.15s ease; }
-    .metric:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.06); }
-    .metric .label { font-size: 12px; color: #6b6b66; margin: 0 0 6px; font-weight: 500; }
-    .metric .value { font-size: 22px; font-weight: 700; margin: 0; }
-    .card { background: #ffffff; border: 1px solid #ece9df; border-radius: 12px; padding: 18px 22px; margin-bottom: 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-    .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-    .card-head .h { font-size: 14px; font-weight: 600; margin: 0; }
-    .badge { font-size: 11px; background: #e1f5ee; color: #085041; padding: 4px 11px; border-radius: 20px; font-weight: 600; }
-    .banner { display: flex; align-items: center; background: #faeeda; border-radius: 10px; padding: 12px 16px; margin-bottom: 22px; font-size: 13px; color: #633806; }
-    .banner .dot { width: 8px; height: 8px; border-radius: 50%; background: #854f0b; margin-right: 10px; flex: none; }
-    table.kv { width: 100%; font-size: 13px; border-collapse: collapse; }
-    table.kv td { padding: 6px 0; }
-    table.kv td.k { color: #6b6b66; }
-    table.kv td.v { font-weight: 500; text-align: right; }
-    .upload-btn { background: #185fa5; color: #fff; border: none; padding: 9px 18px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; margin-bottom: 22px; }
-    .upload-btn:hover { background: #0f4a85; }
-    .drawer-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 10; }
-    .drawer-overlay.open { opacity: 1; pointer-events: auto; }
-    .drawer { position: fixed; top: 0; right: -360px; width: 320px; height: 100%; background: #fff; box-shadow: -2px 0 16px rgba(0,0,0,0.1); padding: 24px 20px; transition: right 0.25s ease; z-index: 11; }
-    .drawer.open { right: 0; }
-    .drawer h3 { font-size: 15px; margin: 0 0 4px; }
-    .drawer p.sub { font-size: 12px; color: #6b6b66; margin: 0 0 20px; }
-    .drawer input[type=file] { width: 100%; margin-bottom: 16px; font-size: 13px; }
-    .drawer-actions { display: flex; gap: 8px; }
-    .drawer-actions button { border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; flex: 1; }
-    .drawer-actions .submit { background: #185fa5; color: #fff; }
-    .drawer-actions .close { background: #f5f4f0; color: #6b6b66; }
-    .chart-select { font-size: 13px; padding: 5px 10px; border-radius: 6px; border: 1px solid #e0ddd3; color: #1a1a1a; }
-</style>
-       
-   </head>
-   <body>
-       <div class="container">
-           <div class="nav">
-               <a href="{% url 'home-index' %}" class="{% if active == 'home' %}active{% endif %}">Home</a>
-               <a href="{% url 'season-location-index' %}" class="{% if active == 'season-location' %}active{% endif %}">Season &amp; Location</a>
-               <a href="{% url 'grains-plants-index' %}" class="{% if active == 'grains-plants' %}active{% endif %}">Grains &amp; Plants</a>
-               <a href="{% url 'schedule-index' %}" class="{% if active == 'schedule' %}active{% endif %}">Schedule</a>
-           </div>
-           {% block content %}{% endblock %}
-       </div>
-   </body>
-   </html>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AgriPlatform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <style>
+        :root {
+            --bg: #f6f2e8;
+            --surface: #ffffff;
+            --border: #e5ddc8;
+            --ink: #241f19;
+            --ink-muted: #756b5c;
+            --accent: #2f6b4f;
+            --accent-dark: #234f3a;
+            --accent-soft: #e3ede7;
+            --warning-bg: #faeeda;
+            --warning-ink: #633806;
+            --warning-dot: #854f0b;
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', Arial, Helvetica, sans-serif; color: var(--ink); margin: 0; background: var(--bg); }
+        .nav { display: flex; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 1px solid var(--border); padding: 18px 32px; background: var(--surface); }
+        .nav .brand { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink); text-decoration: none; transition: opacity 0.15s ease; }
+        .nav .brand:hover { opacity: 0.7; }
+        .nav .brand .accent-dot { color: var(--accent); }
+        .nav-links { display: flex; align-items: center; gap: 6px; }
+        .nav a { padding: 7px 15px; border-radius: 7px; font-size: 13px; font-weight: 500; color: var(--ink-muted); text-decoration: none; transition: background 0.15s ease; }
+        .nav a.active { background: var(--accent); color: #fff; }
+        .nav a:hover:not(.active) { background: var(--accent-soft); }
+        .container { max-width: 1100px; margin: 0 auto; padding: 32px 32px 60px; }
+        .page-title { font-size: 20px; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.01em; }
+        .page-sub { font-size: 13px; color: var(--ink-muted); margin: 0 0 22px; }
+        .note { font-size: 12px; color: #a68a3f; margin-top: 8px; }
+        .grid { display: flex; flex-wrap: wrap; gap: 24px; margin-bottom: 32px; }
+        .metric { background: var(--surface); border-bottom: 2px solid var(--accent); padding: 18px 4px 14px; flex: 1 1 140px; }
+        .metric .label { font-size: 12px; color: var(--ink-muted); margin: 0 0 8px; font-weight: 500; letter-spacing: 0.01em; }
+        .metric .value { font-size: 32px; font-weight: 700; margin: 0; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; line-height: 1; color: var(--ink); }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; margin-bottom: 32px; box-shadow: 0 1px 3px rgba(36,31,25,0.04); }
+        .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .card-head .h { font-size: 14px; font-weight: 600; margin: 0; }
+        .badge { font-size: 11px; background: var(--accent-soft); color: var(--accent-dark); padding: 4px 11px; border-radius: 20px; font-weight: 600; }
+        .badge.accent { background: #e6eef8; color: #1d4d7a; }
+        .banner { display: flex; align-items: center; background: var(--warning-bg); border-radius: 10px; padding: 12px 16px; margin-bottom: 22px; font-size: 13px; color: var(--warning-ink); }
+        .banner .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warning-dot); margin-right: 10px; flex: none; }
+        table.kv { width: 100%; font-size: 13px; border-collapse: collapse; }
+        table.kv td { padding: 6px 0; }
+        table.kv td.k { color: var(--ink-muted); }
+        table.kv td.v { font-weight: 500; text-align: right; color: var(--ink); }
+        .upload-btn { background: var(--accent); color: #fff; border: none; padding: 9px 18px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; margin-bottom: 22px; }
+        .upload-btn:hover { background: var(--accent-dark); }
+        .drawer-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(36,31,25,0.35); opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 10; }
+        .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+        .drawer { position: fixed; top: 0; right: -360px; width: 320px; height: 100%; background: var(--surface); box-shadow: -2px 0 16px rgba(36,31,25,0.12); padding: 24px 20px; transition: right 0.25s ease; z-index: 11; }
+        .drawer.open { right: 0; }
+        .drawer h3 { font-size: 15px; margin: 0 0 4px; }
+        .drawer p.sub { font-size: 12px; color: var(--ink-muted); margin: 0 0 20px; }
+        .drawer input[type=file] { width: 100%; margin-bottom: 16px; font-size: 13px; }
+        .drawer-actions { display: flex; gap: 8px; }
+        .drawer-actions button { border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; flex: 1; }
+        .drawer-actions .submit { background: var(--accent); color: #fff; }
+        .drawer-actions .close { background: var(--bg); color: var(--ink-muted); }
+        .chart-select { font-size: 13px; padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border); color: var(--ink); background: var(--surface); }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="{% url 'home-index' %}" class="brand">AgriPlatform<span class="accent-dot">.</span></a>
+        <div class="nav-links">
+            <a href="{% url 'home-index' %}" class="{% if active == 'home' %}active{% endif %}">Home</a>
+            <a href="{% url 'season-location-index' %}" class="{% if active == 'season-location' %}active{% endif %}">Season &amp; Location</a>
+            <a href="{% url 'grains-plants-index' %}" class="{% if active == 'grains-plants' %}active{% endif %}">Grains &amp; Plants</a>
+            <a href="{% url 'schedule-index' %}" class="{% if active == 'schedule' %}active{% endif %}">Schedule</a>
+        </div>
+    </div>
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>
