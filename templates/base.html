@@ -9,29 +9,30 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <style>
         :root {
-            --bg: #f6f2e8;
-            --surface: #ffffff;
-            --border: #e5ddc8;
-            --ink: #241f19;
-            --ink-muted: #756b5c;
-            --accent: #2f6b4f;
-            --accent-dark: #234f3a;
-            --accent-soft: #e3ede7;
-            --warning-bg: #faeeda;
-            --warning-ink: #633806;
-            --warning-dot: #854f0b;
+            --bg: #f6f2e8; --surface: #ffffff; --border: #e5ddc8;
+            --ink: #241f19; --ink-muted: #756b5c;
+            --accent: #2f6b4f; --accent-dark: #234f3a; --accent-soft: #e3ede7;
+            --warning-bg: #faeeda; --warning-ink: #633806; --warning-dot: #854f0b;
         }
         * { box-sizing: border-box; }
-        body { font-family: 'Inter', Arial, Helvetica, sans-serif; color: var(--ink); margin: 0; background: var(--bg); }
-        .nav { display: flex; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 1px solid var(--border); padding: 18px 32px; background: var(--surface); }
-        .nav .brand { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink); text-decoration: none; transition: opacity 0.15s ease; }
-        .nav .brand:hover { opacity: 0.7; }
+        body { font-family: 'Inter', Arial, Helvetica, sans-serif; color: var(--ink); margin: 0; }
+        body::before { content: ""; position: fixed; inset: 0; z-index: -1; background: #241f19 url("{% static 'landing/hero.jpg' %}") center 30%/cover no-repeat; }
+        .nav-wrap { position: relative; display: flex; justify-content: center; padding: 22px 20px 8px; }
+        .nav { display: inline-flex; align-items: center; gap: 4px; border: 1px solid rgba(36,31,25,0.1); background: rgba(255,255,255,0.85); backdrop-filter: blur(6px); border-radius: 999px; padding: 6px 8px; box-shadow: 0 2px 20px -8px rgba(36,31,25,0.2); }
+        .nav .brand { font-size: 15px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink); text-decoration: none; padding: 6px 14px; border-radius: 999px; }
         .nav .brand .accent-dot { color: var(--accent); }
-        .nav-links { display: flex; align-items: center; gap: 6px; }
-        .nav a { padding: 7px 15px; border-radius: 7px; font-size: 13px; font-weight: 500; color: var(--ink-muted); text-decoration: none; transition: background 0.15s ease; }
+        .nav-divider { width: 1px; height: 18px; background: var(--border); flex: none; }
+        .nav-links { display: flex; align-items: center; gap: 2px; }
+        .nav a { padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 500; color: var(--ink-muted); text-decoration: none; transition: background 0.15s ease; }
         .nav a.active { background: var(--accent); color: #fff; }
         .nav a:hover:not(.active) { background: var(--accent-soft); }
-        .container { max-width: 1100px; margin: 0 auto; padding: 32px 32px 60px; }
+        .account-pill { position: absolute; right: 32px; top: 50%; transform: translateY(-50%); display: inline-flex; align-items: center; gap: 6px; border: 1px solid rgba(36,31,25,0.1); background: rgba(255,255,255,0.85); backdrop-filter: blur(6px); border-radius: 999px; padding: 6px 8px 6px 6px; box-shadow: 0 2px 20px -8px rgba(36,31,25,0.2); }
+        .account-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none; }
+        .account-name { font-size: 13px; font-weight: 500; color: var(--ink); }
+        .logout-form { display: inline; margin: 0; }
+        .account-logout, .account-login { font: inherit; font-size: 12px; font-weight: 500; color: var(--ink-muted); background: none; border: none; cursor: pointer; text-decoration: none; padding: 5px 10px; border-radius: 999px; transition: background 0.15s ease; }
+        .account-logout:hover, .account-login:hover { background: var(--accent-soft); }
+        .container { max-width: 1100px; margin: 0 auto; padding: 24px 32px 60px; }
         .page-title { font-size: 20px; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.01em; }
         .page-sub { font-size: 13px; color: var(--ink-muted); margin: 0 0 22px; }
         .note { font-size: 12px; color: #a68a3f; margin-top: 8px; }
@@ -39,20 +40,20 @@
         .metric { background: var(--surface); border-bottom: 2px solid var(--accent); padding: 18px 4px 14px; flex: 1 1 140px; }
         .metric .label { font-size: 12px; color: var(--ink-muted); margin: 0 0 8px; font-weight: 500; letter-spacing: 0.01em; }
         .metric .value { font-size: 32px; font-weight: 700; margin: 0; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; line-height: 1; color: var(--ink); }
-        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; margin-bottom: 32px; box-shadow: 0 1px 3px rgba(36,31,25,0.04); }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px 22px; margin-bottom: 32px; box-shadow: 0 1px 3px rgba(36,31,25,0.04); }
         .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
         .card-head .h { font-size: 14px; font-weight: 600; margin: 0; }
         .badge { font-size: 11px; background: var(--accent-soft); color: var(--accent-dark); padding: 4px 11px; border-radius: 20px; font-weight: 600; }
         .badge.accent { background: #e6eef8; color: #1d4d7a; }
-        .banner { display: flex; align-items: center; background: var(--warning-bg); border-radius: 10px; padding: 12px 16px; margin-bottom: 22px; font-size: 13px; color: var(--warning-ink); }
+        .banner { display: flex; align-items: center; background: var(--warning-bg); border-radius: 999px; padding: 12px 18px; margin-bottom: 22px; font-size: 13px; color: var(--warning-ink); }
         .banner .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warning-dot); margin-right: 10px; flex: none; }
         table.kv { width: 100%; font-size: 13px; border-collapse: collapse; }
         table.kv td { padding: 6px 0; }
         table.kv td.k { color: var(--ink-muted); }
         table.kv td.v { font-weight: 500; text-align: right; color: var(--ink); }
-        .upload-btn { background: var(--accent); color: #fff; border: none; padding: 9px 18px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; margin-bottom: 22px; }
+        .upload-btn { background: var(--accent); color: #fff; border: none; padding: 10px 20px; border-radius: 999px; font-size: 13px; font-weight: 500; cursor: pointer; margin-bottom: 22px; }
         .upload-btn:hover { background: var(--accent-dark); }
-        .drawer-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(36,31,25,0.35); opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 10; }
+        .drawer-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 10; }
         .drawer-overlay.open { opacity: 1; pointer-events: auto; }
         .drawer { position: fixed; top: 0; right: -360px; width: 320px; height: 100%; background: var(--surface); box-shadow: -2px 0 16px rgba(36,31,25,0.12); padding: 24px 20px; transition: right 0.25s ease; z-index: 11; }
         .drawer.open { right: 0; }
@@ -60,23 +61,46 @@
         .drawer p.sub { font-size: 12px; color: var(--ink-muted); margin: 0 0 20px; }
         .drawer input[type=file] { width: 100%; margin-bottom: 16px; font-size: 13px; }
         .drawer-actions { display: flex; gap: 8px; }
-        .drawer-actions button { border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; flex: 1; }
+        .drawer-actions button { border: none; padding: 8px 16px; border-radius: 999px; font-size: 13px; cursor: pointer; flex: 1; }
         .drawer-actions .submit { background: var(--accent); color: #fff; }
         .drawer-actions .close { background: var(--bg); color: var(--ink-muted); }
-        .chart-select { font-size: 13px; padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border); color: var(--ink); background: var(--surface); }
+        .chart-select { font-size: 13px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border); color: var(--ink); background: var(--surface); }
+        .app-message { padding: 12px 18px; border-radius: 12px; font-size: 13px; margin-bottom: 20px; }
+        .app-message.success { background: var(--accent-soft); color: var(--accent-dark); }
+        .app-message.error { background: var(--warning-bg); color: var(--warning-ink); }
     </style>
 </head>
 <body>
-    <div class="nav">
-        <a href="{% url 'home-index' %}" class="brand">AgriPlatform<span class="accent-dot">.</span></a>
-        <div class="nav-links">
-            <a href="{% url 'home-index' %}" class="{% if active == 'home' %}active{% endif %}">Home</a>
-            <a href="{% url 'season-location-index' %}" class="{% if active == 'season-location' %}active{% endif %}">Season &amp; Location</a>
-            <a href="{% url 'grains-plants-index' %}" class="{% if active == 'grains-plants' %}active{% endif %}">Grains &amp; Plants</a>
-            <a href="{% url 'schedule-index' %}" class="{% if active == 'schedule' %}active{% endif %}">Schedule</a>
+    <div class="nav-wrap">
+        <div class="nav">
+            <a href="{% url 'home-index' %}" class="brand">AgriPlatform<span class="accent-dot">.</span></a>
+            <span class="nav-divider"></span>
+            <div class="nav-links">
+                <a href="{% url 'home-index' %}" class="{% if active == 'home' %}active{% endif %}">Home</a>
+                <a href="{% url 'season-location-index' %}" class="{% if active == 'season-location' %}active{% endif %}">Season &amp; Location</a>
+                <a href="{% url 'grains-plants-index' %}" class="{% if active == 'grains-plants' %}active{% endif %}">Grains &amp; Plants</a>
+                <a href="{% url 'schedule-index' %}" class="{% if active == 'schedule' %}active{% endif %}">Schedule</a>
+            </div>
+        </div>
+        <div class="account-pill">
+            {% if user.is_authenticated %}
+                <span class="account-avatar">{{ user.username|first|upper }}</span>
+                <span class="account-name">{{ user.username }}</span>
+                <form method="post" action="{% url 'logout' %}" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="account-logout">Log out</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="account-login">Log in</a>
+            {% endif %}
         </div>
     </div>
     <div class="container">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="app-message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
         {% block content %}{% endblock %}
     </div>
 </body>

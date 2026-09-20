@@ -3,23 +3,26 @@
 <p class="page-title">Farm overview</p>
 <p class="page-sub">Thanjavur field · Rabi season</p>
 
+{% if can_upload %}
 <button class="upload-btn" onclick="document.getElementById('drawer-overlay').classList.add('open'); document.getElementById('upload-drawer').classList.add('open');">
     Upload weather log
-</button>
+ </button>
 
 <div id="drawer-overlay" class="drawer-overlay" onclick="document.getElementById('drawer-overlay').classList.remove('open'); document.getElementById('upload-drawer').classList.remove('open');"></div>
 
 <div id="upload-drawer" class="drawer">
     <h3>Upload weather log</h3>
     <p class="sub">CSV with daily temperature, humidity &amp; soil moisture readings</p>
-    <form onsubmit="event.preventDefault(); alert('Upload handling comes in a later step!');">
-        <input type="file" accept=".csv">
+    <form method="post" action="{% url 'home-upload' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="csv_file" accept=".csv" required>
         <div class="drawer-actions">
             <button type="submit" class="submit">Upload</button>
             <button type="button" class="close" onclick="document.getElementById('drawer-overlay').classList.remove('open'); document.getElementById('upload-drawer').classList.remove('open');">Cancel</button>
         </div>
     </form>
 </div>
+{% endif %}
 
 <div class="banner">
     <div class="dot"></div>
