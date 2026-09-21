@@ -1,17 +1,12 @@
-"""
-WSGI config for agriplatform project.
-
-It exposes the WSGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/6.1/howto/deployment/wsgi/
-"""
-
 import os
+import sys
+
+# THIS is the critical fix — adds the project root to Python's path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'agriplatform.settings')
 
 application = get_wsgi_application()
-app = application
+app = application   
