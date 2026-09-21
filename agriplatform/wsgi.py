@@ -1,7 +1,6 @@
 import os
 import sys
 
-# THIS is the critical fix — adds the project root to Python's path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from django.core.wsgi import get_wsgi_application
