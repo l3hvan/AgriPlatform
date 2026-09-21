@@ -3,6 +3,7 @@
 <p class="page-title">Grains &amp; Plants</p>
 <p class="page-sub">KNN estimates yield from real historical seasons with similar conditions</p>
 
+{% if can_upload %}
 <button class="upload-btn" onclick="document.getElementById('drawer-overlay').classList.add('open'); document.getElementById('upload-drawer').classList.add('open');">
     Upload seed data
 </button>
@@ -12,14 +13,16 @@
 <div id="upload-drawer" class="drawer">
     <h3>Upload seed data</h3>
     <p class="sub">CSV with past seasons' seed variety &amp; yield records</p>
-    <form onsubmit="event.preventDefault(); alert('Upload handling comes in a later step!');">
-        <input type="file" accept=".csv">
-        <div class="drawer-actions">
+    <form method="post" action="{% url 'grains-plants-upload' %}" enctype="multipart/form-data">
+       {% csrf_token %}
+       <input type="file" name="csv_file" accept=".csv" required>
+      <div class="drawer-actions">
             <button type="submit" class="submit">Upload</button>
             <button type="button" class="close" onclick="document.getElementById('drawer-overlay').classList.remove('open'); document.getElementById('upload-drawer').classList.remove('open');">Cancel</button>
         </div>
     </form>
 </div>
+{% endif %}
 
 <div class="card">
     <div class="card-head">
