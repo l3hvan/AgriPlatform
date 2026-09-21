@@ -1,25 +1,20 @@
 import pandas as pd
 import joblib
 from django.conf import settings
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from sklearn.neighbors import NearestNeighbors
 from sklearn.preprocessing import StandardScaler
-from .models import SeedRecord
 
 DISTRICTS = ['Banda', 'Chhatarpur', 'Cuddalore', 'Damoh', 'Datia', 'Jalaun',
              'Panna', 'Sagar', 'Thanjavur', 'Tikamgarh']
 
-REQUIRED_COLUMNS = {'district', 'year', 'seed_variety', 'yield_t_ha'}
-
-@login_required
 def index(request):
     selected_district = request.GET.get('district', 'Thanjavur')
 
     model_path = settings.BASE_DIR / 'ml_models' / 'trained'
     data_path = settings.BASE_DIR / 'ml_models' / 'datasets' / 'real_crop_data.csv'
 
+    # Step 1: reuse the Random Forest to get the predicted crop for this district
     rf_model = joblib.load(model_path / 'random_forest_crop_model_real.pkl')
     district_encoder = joblib.load(model_path / 'district_encoder.pkl')
 
@@ -34,6 +29,8 @@ def index(request):
     }])
     predicted_crop = rf_model.predict(rf_features)[0]
 
+    # Step 2: KNN - find the 3 nearest OTHER seasons that also grew this crop,
+    # and average their real yield as the estimate
     crop_rows = data[data['dominant_crop'] == predicted_crop].reset_index(drop=True)
 
     scaler = StandardScaler()
@@ -71,41 +68,3 @@ def index(request):
         'similar_seasons': similar_seasons,
     }
     return render(request, 'grains_plants/index.html', context)
-
-
-@login_required
-def upload_seed_data(request):
-    if request.method != 'POST' or 'csv_file' not in request.FILES:
-        messages.error(request, "No file was uploaded.")
-        return redirect('grains-plants-index')
-
-    uploaded_file = request.FILES['csv_file']
-
-    if not uploaded_file.name.endswith('.csv'):
-        messages.error(request, "Please upload a .csv file.")
-        return redirect('grains-plants-index')
-
-    try:
-        df = pd.read_csv(uploaded_file)
-    except Exception:
-        messages.error(request, "Couldn't read that file - make sure it's a valid CSV.")
-        return redirect('grains-plants-index')
-
-    missing = REQUIRED_COLUMNS - set(df.columns)
-    if missing:
-        messages.error(request, f"Missing required column(s): {', '.join(sorted(missing))}")
-        return redirect('grains-plants-index')
-
-    records = [
-        SeedRecord(
-            district=row['district'],
-            year=int(row['year']),
-            seed_variety=row['seed_variety'],
-            yield_t_ha=row['yield_t_ha'],
-            uploaded_by=request.user,
-        )
-        for _, row in df.iterrows()
-    ]
-    SeedRecord.objects.bulk_create(records)
-    messages.success(request, f"Uploaded {len(records)} seed data row(s) successfully.")
-    return redirect('grains-plants-index')

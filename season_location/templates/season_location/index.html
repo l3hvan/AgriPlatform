@@ -3,26 +3,24 @@
 <p class="page-title">Season &amp; Location</p>
 <p class="page-sub">Random Forest predicts the dominant crop from real satellite &amp; groundwater data</p>
 
-{% if can_upload %}
 <button class="upload-btn" onclick="document.getElementById('drawer-overlay').classList.add('open'); document.getElementById('upload-drawer').classList.add('open');">
     Upload crop data
- </button>
+</button>
 
 <div id="drawer-overlay" class="drawer-overlay" onclick="document.getElementById('drawer-overlay').classList.remove('open'); document.getElementById('upload-drawer').classList.remove('open');"></div>
 
 <div id="upload-drawer" class="drawer">
     <h3>Upload crop data</h3>
     <p class="sub">CSV with soil, rainfall &amp; temperature records</p>
-    <form method="post" action="{% url 'season-location-upload' %}" enctype="multipart/form-data">
-      {% csrf_token %}
-      <input type="file" name="csv_file" accept=".csv" required>
+    <form onsubmit="event.preventDefault(); alert('Upload handling comes in a later step!');">
+        <input type="file" accept=".csv">
         <div class="drawer-actions">
             <button type="submit" class="submit">Upload</button>
             <button type="button" class="close" onclick="document.getElementById('drawer-overlay').classList.remove('open'); document.getElementById('upload-drawer').classList.remove('open');">Cancel</button>
         </div>
     </form>
- </div>
-{% endif %}
+</div>
+
 <div class="card">
     <div class="card-head">
         <p class="h">Select district</p>
