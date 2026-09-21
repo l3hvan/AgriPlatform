@@ -1,9 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
 <p class="page-title">Farm overview</p>
-<p class="page-sub">Thanjavur field &middot; Rabi season</p>
+<p class="page-sub">Thanjavur field · Rabi season</p>
 
-{% if can_upload %}
 <button class="upload-btn" onclick="document.getElementById('drawer-overlay').classList.add('open'); document.getElementById('upload-drawer').classList.add('open');">
     Upload weather log
 </button>
@@ -13,27 +12,25 @@
 <div id="upload-drawer" class="drawer">
     <h3>Upload weather log</h3>
     <p class="sub">CSV with daily temperature, humidity &amp; soil moisture readings</p>
-    <form method="post" action="{% url 'home-upload' %}" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="file" name="csv_file" accept=".csv" required>
+    <form onsubmit="event.preventDefault(); alert('Upload handling comes in a later step!');">
+        <input type="file" accept=".csv">
         <div class="drawer-actions">
             <button type="submit" class="submit">Upload</button>
             <button type="button" class="close" onclick="document.getElementById('drawer-overlay').classList.remove('open'); document.getElementById('upload-drawer').classList.remove('open');">Cancel</button>
         </div>
     </form>
 </div>
-{% endif %}
 
 <div class="banner">
     <div class="dot"></div>
     <span>Fungal risk elevated in field B — inspect within 24 hours</span>
 </div>
 
-{% if has_data %}
 <div class="grid">
-    <div class="metric"><p class="label">Temperature</p><p class="value">{{ temperature }}&deg;C</p></div>
-    <div class="metric"><p class="label">Humidity</p><p class="value">{{ humidity }}%</p></div>
-    <div class="metric"><p class="label">Soil moisture</p><p class="value">{{ soil_moisture }}%</p></div>
+    <div class="metric"><p class="label">Temperature</p><p class="value">29&deg;C</p></div>
+    <div class="metric"><p class="label">Humidity</p><p class="value">68%</p></div>
+    <div class="metric"><p class="label">Soil moisture</p><p class="value">42%</p></div>
+    <div class="metric"><p class="label">Next irrigation</p><p class="value">6:00 AM</p></div>
 </div>
 
 <div class="card">
@@ -48,24 +45,19 @@
     <canvas id="trendChart" height="90"></canvas>
 </div>
 
-{{ chart_labels|json_script:"chart-labels" }}
-{{ chart_temperature|json_script:"chart-temperature" }}
-{{ chart_humidity|json_script:"chart-humidity" }}
-{{ chart_soil_moisture|json_script:"chart-soil-moisture" }}
-
 <script>
-    const labels = JSON.parse(document.getElementById('chart-labels').textContent);
     const trendData = {
-        temperature: { label: 'Temperature (°C)', values: JSON.parse(document.getElementById('chart-temperature').textContent), color: '#2f6b4f' },
-        humidity: { label: 'Humidity (%)', values: JSON.parse(document.getElementById('chart-humidity').textContent), color: '#1d4d7a' },
-        soil_moisture: { label: 'Soil moisture (%)', values: JSON.parse(document.getElementById('chart-soil-moisture').textContent), color: '#854f0b' },
+        temperature: { label: 'Temperature (°C)', values: [27, 28, 26, 29, 31, 30, 29], color: '#185fa5' },
+        humidity: { label: 'Humidity (%)', values: [62, 65, 70, 68, 64, 66, 68], color: '#085041' },
+        soil_moisture: { label: 'Soil moisture (%)', values: [48, 46, 44, 45, 43, 42, 42], color: '#854f0b' },
     };
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     const ctx = document.getElementById('trendChart').getContext('2d');
     let trendChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: labels,
+            labels: days,
             datasets: [{
                 label: trendData.temperature.label,
                 data: trendData.temperature.values,
@@ -94,14 +86,7 @@
     }
 </script>
 
-<p class="note">Showing your {{ chart_labels|length }} most recently uploaded weather log entries (latest: {{ latest_date }}). For irrigation timing, see the Schedule page — it's already running on real data.</p>
-
-{% else %}
-<div class="card">
-    <p class="card-head h">No weather data yet</p>
-    <p style="font-size:13px;color:#6b6b66;margin:0;">Upload a weather log CSV above to see your real temperature, humidity, and soil moisture history here.</p>
-</div>
-{% endif %}
+<p class="note">Sample 7-day data shown — live sensor history comes later.</p>
 
 <div class="card">
     <p class="card-head h">Current crop</p>
@@ -111,5 +96,5 @@
         <tr><td class="k">Days to harvest</td><td class="v">45</td></tr>
     </table>
 </div>
-<p class="note">Sample data shown — not yet connected to Season &amp; Location's real prediction.</p>
+<p class="note">Sample data shown — live sensor feed comes later.</p>
 {% endblock %}

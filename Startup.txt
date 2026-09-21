@@ -1,5 +1,0 @@
-1. To Start the venv use 
-     venv\Scripts\activate
-
-2. To Run server use 
-     python manage.py runserver
