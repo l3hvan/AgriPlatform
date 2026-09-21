@@ -1,15 +1,1 @@
-{
-  "builds": [
-    {
-      "src": "agriplatform/wsgi.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxDuration": 10,
-        "includeFiles": ["requirements.txt"]
-      }
-    }
-  ],
-  "routes": [
-    { "src": "/(.*)", "dest": "agriplatform/wsgi.py" }
-  ]
-}   
+{}
