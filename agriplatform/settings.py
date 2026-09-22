@@ -26,8 +26,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',') if os.environ.get('ALLOWED_HOSTS') else []
-
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -163,12 +162,9 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 # These only activate when DEBUG is False - i.e. in real production,
 # never during local development (your dev server has no HTTPS to redirect to)
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
+    SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_HSTS_SECONDS = 31536000
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
 
 AUTHENTICATION_BACKENDS = [
     'axes.backends.AxesStandaloneBackend',

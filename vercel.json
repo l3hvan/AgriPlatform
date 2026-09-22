@@ -1,22 +1,15 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "builds": [
     {
       "src": "agriplatform/wsgi.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxDuration": 10,
-        "includeFiles": ["requirements.txt"]
-      }
+      "use": "@vercel/python"
     }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "agriplatform/wsgi.py" }
-  ]
-}{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "builds": [
-    { "src": "*.html", "use": "@vercel/static" },
-    { "src": "*.py", "use": "@vercel/python" },
-    { "src": "*.js", "use": "@vercel/node" }
+    {
+      "src": "/(.*)",
+      "dest": "agriplatform/wsgi.py"
+    }
   ]
 }
