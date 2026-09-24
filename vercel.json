@@ -1,1 +1,14 @@
-{}
+{
+  "builds": [
+    {
+      "src": "agriplatform/wsgi.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "agriplatform/wsgi.py"
+    }
+  ]
+}
