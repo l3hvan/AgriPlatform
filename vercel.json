@@ -1,5 +1,15 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "source": "/feedback/((?!general).*)",
-  "destination": "/api/feedback/general"
+  "builds": [
+    {
+      "src": "agriplatform/wsgi.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "agriplatform/wsgi.py"
+    }
+  ]
 }
