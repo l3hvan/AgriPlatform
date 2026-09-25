@@ -1,4 +1,8 @@
-django>=4.0,<5.0
-gunicorn
-dj-database-url
+Django==6.1.1
+django-axes==8.3.1
+python-dotenv==1.2.3
+numpy==2.5.2
+pandas==3.0.5
+scikit-learn==1.9.0
+joblib==1.6.0
 psycopg2-binary
