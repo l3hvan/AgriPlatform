@@ -1,10 +1,58 @@
+from functools import lru_cache
+
 import pandas as pd
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+from ml_models.evaluate_models import DATA_PATH, evaluate_fuzzy, evaluate_knn, evaluate_random_forest
 from .models import WeatherLog
 
 REQUIRED_COLUMNS = {'date', 'temperature', 'humidity', 'soil_moisture'}
+
+
+@lru_cache(maxsize=1)
+def model_evaluation():
+    """Cross-validation takes a second or two, and the dataset only changes on redeploy - compute once."""
+    df = pd.read_csv(DATA_PATH)
+    rf = evaluate_random_forest(df)
+    knn = evaluate_knn(df)
+    fuzzy = evaluate_fuzzy()
+
+    return {
+        'rf': {
+            'holdout_accuracy': round(rf['holdout_accuracy'] * 100, 1),
+            'cv_accuracy': round(rf['cv_accuracy'] * 100, 1),
+            'cv_std': round(rf['cv_std'] * 100, 1),
+            'baseline_accuracy': round(rf['baseline_accuracy'] * 100, 1),
+            'baseline_crop': rf['baseline_crop'],
+            'crop_counts': df['dominant_crop'].value_counts().to_dict(),
+            'rows': len(df),
+        },
+        'knn': {
+            'overall_error': round(knn['overall_error'], 1),
+            'overall_accuracy': round(100 - knn['overall_error'], 1),
+            'by_crop': [
+                {'crop': crop, 'error': round(row['mean'], 1), 'count': int(row['count'])}
+                for crop, row in knn['by_crop'].iterrows()
+            ],
+        },
+        'fuzzy': {
+            'temperatures': list(fuzzy['sweep'].columns),
+            'sweep': [
+                {'label': label, 'values': [round(v, 1) for v in row]}
+                for label, row in fuzzy['sweep'].iterrows()
+            ],
+            'checks': [{'name': name, 'passed': bool(passed)} for name, passed in fuzzy['checks'].items()],
+            'checks_passed': sum(bool(p) for p in fuzzy['checks'].values()),
+            'checks_total': len(fuzzy['checks']),
+        },
+    }
+
+
+@login_required
+def models_overview(request):
+    context = {'active': 'models', **model_evaluation()}
+    return render(request, 'home/models.html', context)
 
 @login_required
 def index(request):

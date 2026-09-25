@@ -10,7 +10,13 @@ import numpy as np
 
 
 def trimf(x, a, b, c):
-    """Triangular membership function: 0 at a, peaks to 1 at b, back to 0 at c."""
+    """Triangular membership function: 0 at a, peaks to 1 at b, back to 0 at c.
+
+    When a == b (or b == c) the set is a shoulder: anything beyond that edge
+    stays fully in the set, so extreme readings aren't treated as "no match".
+    """
+    if (a == b and x <= b) or (b == c and x >= b):
+        return 1.0
     if x <= a or x >= c:
         return 0.0
     if x == b:

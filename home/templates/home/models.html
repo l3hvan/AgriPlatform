@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .logic-flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12px; margin: 0 0 16px; }
+    .logic-flow .step { background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 5px 12px; color: var(--ink); }
+    .logic-flow .arrow { color: var(--ink-muted); }
+    .logic-desc { font-size: 13px; color: var(--ink-muted); line-height: 1.55; margin: 0 0 16px; }
+    .stat-row { display: flex; flex-wrap: wrap; gap: 24px; margin-bottom: 18px; }
+    .stat-row .metric { border-bottom-width: 2px; }
+    .metric.muted { border-bottom-color: var(--border); }
+    .metric .hint { font-size: 11px; color: var(--ink-muted); margin: 6px 0 0; }
+    .fuzzy-table { width: 100%; border-collapse: separate; border-spacing: 3px; font-size: 13px; font-variant-numeric: tabular-nums; }
+    .fuzzy-table th { font-size: 11px; font-weight: 500; color: var(--ink-muted); padding: 4px 6px; text-align: center; }
+    .fuzzy-table th.row-label { text-align: left; }
+    .fuzzy-table td { text-align: center; padding: 8px 4px; border-radius: 6px; font-weight: 600; }
+    .check-list { list-style: none; padding: 0; margin: 16px 0 0; font-size: 13px; }
+    .check-list li { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+    .check-list .mark { width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex: none; }
+    .check-list .pass { background: var(--accent-soft); color: var(--accent-dark); }
+    .check-list .fail { background: var(--warning-bg); color: var(--warning-ink); }
+    .used-on { font-size: 12px; color: var(--ink-muted); }
+    .used-on a { color: var(--accent); font-weight: 500; }
+    .chart-box { position: relative; height: 220px; }
+</style>
+
+<p class="page-title">Models</p>
+<p class="page-sub">The three pieces of logic behind AgriPlatform, and how well each one performs on real data</p>
+
+<div class="grid">
+    <div class="metric"><p class="label">Crop recommendation accuracy</p><p class="value">{{ rf.cv_accuracy }}%</p></div>
+    <div class="metric"><p class="label">Yield estimate accuracy</p><p class="value">{{ knn.overall_accuracy }}%</p></div>
+    <div class="metric"><p class="label">Irrigation rule checks passed</p><p class="value">{{ fuzzy.checks_passed }}/{{ fuzzy.checks_total }}</p></div>
+</div>
+
+{# ---------------- Random Forest ---------------- #}
+<div class="card" id="random-forest">
+    <div class="card-head">
+        <p class="h">1. Random Forest &mdash; crop recommendation</p>
+        <span class="used-on">Used on <a href="{% url 'season-location-index' %}">Season &amp; Location</a> and <a href="{% url 'grains-plants-index' %}">Grains &amp; Plants</a></span>
+    </div>
+    <div class="logic-flow">
+        <span class="step">District</span><span class="step">NDVI (vegetation)</span><span class="step">Groundwater anomaly</span>
+        <span class="arrow">&rarr;</span><span class="step">100 decision trees vote</span>
+        <span class="arrow">&rarr;</span><span class="step"><strong>Best crop</strong></span>
+    </div>
+    <p class="logic-desc">
+        Trained on {{ rf.rows }} real district-year seasons (ICRISAT crop records + GRACE groundwater + NDVI satellite data).
+        Each tree learns a different set of if/then splits; the crop with the most votes wins, and the share of votes becomes the confidence shown on the page.
+    </p>
+    <div class="stat-row">
+        <div class="metric"><p class="label">5-fold cross-validation</p><p class="value">{{ rf.cv_accuracy }}%</p><p class="hint">&plusmn; {{ rf.cv_std }}% across folds</p></div>
+        <div class="metric"><p class="label">Held-out test (20%)</p><p class="value">{{ rf.holdout_accuracy }}%</p><p class="hint">one fixed split</p></div>
+        <div class="metric muted"><p class="label">Baseline: always &ldquo;{{ rf.baseline_crop }}&rdquo;</p><p class="value">{{ rf.baseline_accuracy }}%</p><p class="hint">what the model must beat</p></div>
+    </div>
+    <div class="chart-box"><canvas id="rfChart"></canvas></div>
+    <p class="note">Rare crops have very few examples ({% for crop, n in rf.crop_counts.items %}{{ crop }} {{ n }}{% if not forloop.last %}, {% endif %}{% endfor %}), so they are predicted less reliably than Wheat, Chickpea and Rice.</p>
+</div>
+
+{# ---------------- KNN ---------------- #}
+<div class="card" id="knn">
+    <div class="card-head">
+        <p class="h">2. K-Nearest Neighbors &mdash; yield estimate</p>
+        <span class="used-on">Used on <a href="{% url 'grains-plants-index' %}">Grains &amp; Plants</a></span>
+    </div>
+    <div class="logic-flow">
+        <span class="step">Predicted crop</span><span class="step">Current NDVI + groundwater</span>
+        <span class="arrow">&rarr;</span><span class="step">Find 3 most similar past seasons</span>
+        <span class="arrow">&rarr;</span><span class="step"><strong>Average their yield</strong></span>
+    </div>
+    <p class="logic-desc">
+        Measured with leave-one-out testing: every real season is hidden in turn, its yield is estimated from its 3 nearest neighbours,
+        and the estimate is compared with what was actually harvested.
+    </p>
+    <div class="stat-row">
+        <div class="metric"><p class="label">Average accuracy</p><p class="value">{{ knn.overall_accuracy }}%</p></div>
+        <div class="metric muted"><p class="label">Average error</p><p class="value">{{ knn.overall_error }}%</p><p class="hint">mean absolute % error</p></div>
+    </div>
+    <div class="chart-box"><canvas id="knnChart"></canvas></div>
+    <p class="note">Lower is better. Crops with fewer than 5 real seasons are left out because there aren't enough neighbours to test fairly.</p>
+</div>
+
+{# ---------------- Fuzzy Logic ---------------- #}
+<div class="card" id="fuzzy-logic">
+    <div class="card-head">
+        <p class="h">3. Fuzzy Logic &mdash; irrigation &amp; fertilizer</p>
+        <span class="used-on">Used on <a href="{% url 'schedule-index' %}">Schedule</a></span>
+    </div>
+    <div class="logic-flow">
+        <span class="step">Soil moisture</span><span class="step">Temperature</span>
+        <span class="arrow">&rarr;</span><span class="step">Low / medium / high memberships</span>
+        <span class="arrow">&rarr;</span><span class="step">9 expert rules</span>
+        <span class="arrow">&rarr;</span><span class="step"><strong>Irrigation minutes</strong></span>
+    </div>
+    <p class="logic-desc">
+        Fuzzy logic isn't learned from data, so it has no accuracy percentage. Instead it's checked for sensible behaviour:
+        drier soil and hotter days should always mean more water. The grid below is the live output of the same code the Schedule page runs.
+    </p>
+    <table class="fuzzy-table">
+        <tr>
+            <th class="row-label">Irrigation minutes</th>
+            {% for t in fuzzy.temperatures %}<th>{{ t }}</th>{% endfor %}
+        </tr>
+        {% for row in fuzzy.sweep %}
+        <tr>
+            <th class="row-label">Soil {{ row.label }}</th>
+            {% for v in row.values %}
+            <td style="background: color-mix(in srgb, var(--accent) {% widthratio v 30 100 %}%, var(--bg)); color: {% if v > 14 %}#fff{% else %}var(--ink){% endif %};">{{ v }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    <ul class="check-list">
+        {% for check in fuzzy.checks %}
+        <li><span class="mark {% if check.passed %}pass{% else %}fail{% endif %}">{% if check.passed %}&#10003;{% else %}&#10005;{% endif %}</span>{{ check.name }}</li>
+        {% endfor %}
+    </ul>
+</div>
+
+{{ knn.by_crop|json_script:"knn-data" }}
+<script>
+    const ink = getComputedStyle(document.documentElement).getPropertyValue('--ink-muted').trim();
+    Chart.defaults.color = ink;
+    Chart.defaults.font.family = 'Inter, Arial, sans-serif';
+
+    new Chart(document.getElementById('rfChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Cross-validation', 'Held-out test', 'Baseline (always {{ rf.baseline_crop|escapejs }})'],
+            datasets: [{
+                data: [{{ rf.cv_accuracy }}, {{ rf.holdout_accuracy }}, {{ rf.baseline_accuracy }}],
+                backgroundColor: ['#2f6b4f', '#2f6b4f', '#cfc6b0'],
+                borderRadius: 6,
+                maxBarThickness: 36,
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => c.raw + '% accuracy' } } },
+            scales: { x: { min: 0, max: 100, ticks: { callback: (v) => v + '%' }, grid: { color: '#eee7d6' } }, y: { grid: { display: false } } }
+        }
+    });
+
+    const knn = JSON.parse(document.getElementById('knn-data').textContent);
+    new Chart(document.getElementById('knnChart'), {
+        type: 'bar',
+        data: {
+            labels: knn.map((r) => r.crop + ' (' + r.count + ')'),
+            datasets: [{
+                data: knn.map((r) => r.error),
+                // amber flags crops where the estimate is off by more than 40%
+                backgroundColor: knn.map((r) => r.error > 40 ? '#b7791f' : '#2f6b4f'),
+                borderRadius: 6,
+                maxBarThickness: 36,
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => c.raw + '% average error' } } },
+            scales: { x: { min: 0, ticks: { callback: (v) => v + '%' }, grid: { color: '#eee7d6' } }, y: { grid: { display: false } } }
+        }
+    });
+</script>
+{% endblock %}

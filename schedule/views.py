@@ -14,11 +14,19 @@ REQUIRED_COLUMNS = {'district', 'soil_moisture', 'temperature', 'nutrient_level'
 @login_required
 def index(request):
     selected_district = request.GET.get('district', 'Thanjavur')
-    temperature = float(request.GET.get('temperature', 28))
-    nutrient_level = float(request.GET.get('nutrient_level', 50))
 
-    lookup = pd.read_csv(settings.BASE_DIR / 'ml_models' / 'datasets' / 'soil_moisture_lookup.csv')
-    soil_moisture = lookup[lookup['district'] == selected_district]['soil_moisture'].iloc[0]
+    # Prefer the newest uploaded sensor reading for this district; fall back to satellite data
+    reading = SensorReading.objects.filter(district=selected_district).first()
+    if reading:
+        soil_moisture = reading.soil_moisture
+        default_temperature, default_nutrient = reading.temperature, reading.nutrient_level
+    else:
+        lookup = pd.read_csv(settings.BASE_DIR / 'ml_models' / 'datasets' / 'soil_moisture_lookup.csv')
+        soil_moisture = lookup[lookup['district'] == selected_district]['soil_moisture'].iloc[0]
+        default_temperature, default_nutrient = 28, 50
+
+    temperature = float(request.GET.get('temperature', default_temperature))
+    nutrient_level = float(request.GET.get('nutrient_level', default_nutrient))
 
     irrigation_minutes = compute_irrigation(soil_moisture, temperature)
     fertilizer_action = compute_fertilizer(nutrient_level)
@@ -28,6 +36,7 @@ def index(request):
         'districts': DISTRICTS,
         'selected_district': selected_district,
         'soil_moisture': round(soil_moisture, 1),
+        'sensor_reading': reading,
         'temperature': temperature,
         'nutrient_level': nutrient_level,
         'irrigation_minutes': irrigation_minutes,

@@ -41,7 +41,7 @@
 <div class="card">
     <div class="card-head">
         <p class="h">{{ predicted_crop }} &mdash; estimated yield</p>
-        <span class="badge">K-Nearest Neighbors</span>
+        <a href="{% url 'models-overview' %}#knn" class="badge" title="See how accurate this model is">K-Nearest Neighbors</a>
     </div>
     <p style="font-size:20px;font-weight:bold;margin:0 0 6px;">{{ estimated_yield }} t/ha</p>
     <p style="font-size:13px;color:#6b6b66;margin:0;">Averaged from the 3 most similar historical seasons for {{ selected_district }}</p>

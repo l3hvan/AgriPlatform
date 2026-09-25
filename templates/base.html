@@ -45,6 +45,8 @@
         .card-head .h { font-size: 14px; font-weight: 600; margin: 0; }
         .badge { font-size: 11px; background: var(--accent-soft); color: var(--accent-dark); padding: 4px 11px; border-radius: 20px; font-weight: 600; }
         .badge.accent { background: #e6eef8; color: #1d4d7a; }
+        a.badge { text-decoration: none; }
+        a.badge:hover { background: var(--accent); color: #fff; }
         .banner { display: flex; align-items: center; background: var(--warning-bg); border-radius: 999px; padding: 12px 18px; margin-bottom: 22px; font-size: 13px; color: var(--warning-ink); }
         .banner .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warning-dot); margin-right: 10px; flex: none; }
         table.kv { width: 100%; font-size: 13px; border-collapse: collapse; }
@@ -80,6 +82,7 @@
                 <a href="{% url 'season-location-index' %}" class="{% if active == 'season-location' %}active{% endif %}">Season &amp; Location</a>
                 <a href="{% url 'grains-plants-index' %}" class="{% if active == 'grains-plants' %}active{% endif %}">Grains &amp; Plants</a>
                 <a href="{% url 'schedule-index' %}" class="{% if active == 'schedule' %}active{% endif %}">Schedule</a>
+                <a href="{% url 'models-overview' %}" class="{% if active == 'models' %}active{% endif %}">Models</a>
             </div>
         </div>
         <div class="account-pill">

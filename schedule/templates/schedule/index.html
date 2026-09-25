@@ -12,7 +12,7 @@
 
 <div id="upload-drawer" class="drawer">
     <h3>Upload sensor data</h3>
-    <p class="sub">CSV with soil moisture, temperature &amp; nutrient readings</p>
+    <p class="sub">CSV columns: district, soil_moisture (kg/m&sup2;, same scale as GLDAS, roughly 70&ndash;450), temperature (&deg;C), nutrient_level (0&ndash;100)</p>
     <form method="post" action="{% url 'schedule-upload' %}" enctype="multipart/form-data">
     {% csrf_token %}
     <input type="file" name="csv_file" accept=".csv" required>
@@ -29,7 +29,7 @@
         <p class="h">Field conditions</p>
     </div>
     <form method="get">
-        <label style="font-size:12px;color:#6b6b66;display:block;margin-bottom:4px;">District (soil moisture auto-fills from real satellite data)</label>
+        <label style="font-size:12px;color:#6b6b66;display:block;margin-bottom:4px;">District (soil moisture auto-fills from your latest sensor upload, or satellite data)</label>
         <select name="district" class="chart-select" style="width:100%;margin-bottom:14px;">
             {% for d in districts %}
             <option value="{{ d }}" {% if d == selected_district %}selected{% endif %}>{{ d }}</option>
@@ -47,7 +47,7 @@
 </div>
 
 <div class="grid">
-    <div class="metric"><p class="label">Soil moisture (real)</p><p class="value">{{ soil_moisture }}</p></div>
+    <div class="metric"><p class="label">Soil moisture ({% if sensor_reading %}your sensor{% else %}satellite{% endif %})</p><p class="value">{{ soil_moisture }}</p></div>
     <div class="metric"><p class="label">Temperature</p><p class="value">{{ temperature }}&deg;C</p></div>
     <div class="metric"><p class="label">Nutrient level</p><p class="value">{{ nutrient_level }}</p></div>
 </div>
@@ -55,7 +55,7 @@
 <div class="card">
     <div class="card-head">
         <p class="h">Recommended action</p>
-        <span class="badge">Fuzzy Logic</span>
+        <a href="{% url 'models-overview' %}#fuzzy-logic" class="badge" title="See how this logic behaves">Fuzzy Logic</a>
     </div>
     <table class="kv">
         <tr><td class="k">Irrigate for</td><td class="v">{{ irrigation_minutes }} minutes</td></tr>
@@ -63,5 +63,9 @@
     </table>
 </div>
 
-<p class="note">Soil moisture is a real GLDAS satellite reading (most recent available, Dec 2023) for the selected district. Temperature &amp; nutrient level simulate live IoT sensor input until real hardware is connected.</p>
+{% if sensor_reading %}
+<p class="note">Using your latest uploaded sensor reading for {{ selected_district }} ({{ sensor_reading.uploaded_at|date:"M j, Y H:i" }}). Move the sliders to try other temperature &amp; nutrient values.</p>
+{% else %}
+<p class="note">Soil moisture is a real GLDAS satellite reading (most recent available, Dec 2023) for the selected district. Temperature &amp; nutrient level simulate live IoT sensor input until real hardware is connected. Upload sensor data for this district to use your own readings instead.</p>
+{% endif %}
 {% endblock %}
