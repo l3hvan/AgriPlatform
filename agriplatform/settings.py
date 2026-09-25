@@ -28,6 +28,13 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
+# Vercel terminates HTTPS before Django, so trust its forwarded-protocol header
+# and its domains for CSRF checks. Add a custom domain via CSRF_TRUSTED_ORIGINS in env.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CSRF_TRUSTED_ORIGINS = ['https://*.vercel.app'] + [
+    o for o in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',') if o
+]
+
 # Application definition
 
 INSTALLED_APPS = [
