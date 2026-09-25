@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>AgriPlatform — Farming decisions, backed by real data</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -31,6 +32,21 @@
         .feature .icon { font-size: 28px; margin-bottom: 14px; }
         .feature h3 { font-size: 15px; font-weight: 700; margin: 0 0 8px; }
         .feature p { font-size: 13px; color: #4a4137; line-height: 1.5; margin: 0; }
+
+        @media (max-width: 600px) {
+            .nav-wrap { padding: 16px 16px 0; }
+            .nav .brand { padding: 6px 8px; }
+            .nav a.pill-link { padding: 7px 10px; }
+            .nav a.cta { padding: 7px 14px; }
+            .hero-content { padding: 56px 16px 32px; }
+            .eyebrow { margin-bottom: 20px; }
+            h1 { font-size: 34px; }
+            .hero-sub { font-size: 15px; margin-bottom: 28px; }
+            .hero-ctas { flex-direction: column; align-items: stretch; max-width: 320px; margin: 0 auto; }
+            .hero-ctas a { text-align: center; }
+            .features { padding: 24px 16px 56px; gap: 16px; }
+            .feature { max-width: none; }
+        }
     </style>
 </head>
 <body>

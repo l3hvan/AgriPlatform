@@ -21,6 +21,16 @@
     .used-on { font-size: 12px; color: var(--ink-muted); }
     .used-on a { color: var(--accent); font-weight: 500; }
     .chart-box { position: relative; height: 220px; }
+    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    @media (max-width: 600px) {
+        .logic-flow .arrow { display: none; }
+        .logic-flow .step { font-size: 11px; padding: 4px 10px; }
+        .chart-box { height: 200px; }
+        .fuzzy-table { font-size: 12px; border-spacing: 2px; }
+        .fuzzy-table td { padding: 7px 2px; }
+        .fuzzy-table th { padding: 4px 2px; }
+        .fuzzy-table .soil-prefix { display: none; }
+    }
 </style>
 
 <p class="page-title">Models</p>
@@ -95,20 +105,22 @@
         Fuzzy logic isn't learned from data, so it has no accuracy percentage. Instead it's checked for sensible behaviour:
         drier soil and hotter days should always mean more water. The grid below is the live output of the same code the Schedule page runs.
     </p>
+    <div class="table-scroll">
     <table class="fuzzy-table">
         <tr>
-            <th class="row-label">Irrigation minutes</th>
+            <th class="row-label">Minutes</th>
             {% for t in fuzzy.temperatures %}<th>{{ t }}</th>{% endfor %}
         </tr>
         {% for row in fuzzy.sweep %}
         <tr>
-            <th class="row-label">Soil {{ row.label }}</th>
+            <th class="row-label"><span class="soil-prefix">Soil </span>{{ row.label }}</th>
             {% for v in row.values %}
             <td style="background: color-mix(in srgb, var(--accent) {% widthratio v 30 100 %}%, var(--bg)); color: {% if v > 14 %}#fff{% else %}var(--ink){% endif %};">{{ v }}</td>
             {% endfor %}
         </tr>
         {% endfor %}
     </table>
+    </div>
     <ul class="check-list">
         {% for check in fuzzy.checks %}
         <li><span class="mark {% if check.passed %}pass{% else %}fail{% endif %}">{% if check.passed %}&#10003;{% else %}&#10005;{% endif %}</span>{{ check.name }}</li>
@@ -125,7 +137,7 @@
     new Chart(document.getElementById('rfChart'), {
         type: 'bar',
         data: {
-            labels: ['Cross-validation', 'Held-out test', 'Baseline (always {{ rf.baseline_crop|escapejs }})'],
+            labels: ['Cross-validation', 'Held-out test', 'Always {{ rf.baseline_crop|escapejs }}'],
             datasets: [{
                 data: [{{ rf.cv_accuracy }}, {{ rf.holdout_accuracy }}, {{ rf.baseline_accuracy }}],
                 backgroundColor: ['#2f6b4f', '#2f6b4f', '#cfc6b0'],
